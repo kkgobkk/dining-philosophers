@@ -1,7 +1,7 @@
 # Dining Philosophers
 A simple simulation where N "philosopher" processes and N "chopstick" semaphores are created.
 Each philosopher infinitely alternates between "eating" and "thinking" for a short time.
-Philosopher i needs chopsticks i and (i+1)%N to start eating. When a philosopher stops eating, it puts down both chopsticks.
+Philosopher i needs chopsticks i (left) and (i+1)%N (right) to start eating. When a philosopher stops eating, it puts down both chopsticks.
 The simulation ends automatically after a certain time.
 
 For more information, check https://en.wikipedia.org/wiki/Dining_philosophers_problem
@@ -21,3 +21,4 @@ To compile simply run "make all" in the main directory.
 
 To run, you can use `make run`, or `./bin/dining_philosophers N` if you want to specify N manually.
 Both of these commands must be ran from the main directory
+
