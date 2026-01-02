@@ -1,11 +1,14 @@
 /*
-philosopher.c
+philosopher-asymm.c
 
 author: @kkgobkk
 This program indefinitely alternates between "eating" and "thinking". It can
 switch from eating to thinking whenver it wants, but to do the opposite it needs
 to acquire two chopsticks, specifically the chopsticks of index i, and (i+1)%N.
 N is the number of processes of this type that exist in the simulation.
+This version is "asymmetric": depending on the parity of the index of the philopher, 
+it will try to pick up the left or right chopstick first. This ensures that no
+deadlock is possible
 */
 
 #include <signal.h>
@@ -66,20 +69,42 @@ int main(int argc, char** argv)
 	sem_wait(sem_synch_id, 0);
 
 	/*------main cycle-------*/
-	while (1)
+	if (my_index % 2 == 0)
 	{
-		sem_wait(sem_chopsticks_id, left_chopstick);
-		printf("philosopher %zu (pid %d) picked up chopstick %zu (left)\n", my_index, my_pid, left_chopstick);
-		//sleep(1); uncomment this to make deadlock more likely
-		sem_wait(sem_chopsticks_id, right_chopstick);
-		printf("philosopher %zu (pid %d) picked up chopstick %zu (right)\n", my_index, my_pid, right_chopstick);
+		while (1)
+		{
+			sem_wait(sem_chopsticks_id, left_chopstick);
+			printf("philosopher %zu (pid %d) picked up chopstick %zu (left)\n", my_index, my_pid, left_chopstick);
+			//sleep(1);
+			sem_wait(sem_chopsticks_id, right_chopstick);
+			printf("philosopher %zu (pid %d) picked up chopstick %zu (right)\n", my_index, my_pid, right_chopstick);
+		
+			printf("philosopher %zu (pid %d) is eating\n", my_index, my_pid);
+			sleep(5 + rand() % 6);
 
-		printf("philosopher %zu (pid %d) is eating\n", my_index, my_pid);
-		sleep(5 + rand() % 6);
+			sem_signal(sem_chopsticks_id, left_chopstick);
+			sem_signal(sem_chopsticks_id, right_chopstick);
+			printf("philosopher %zu (pid %d) is thinking\n", my_index, my_pid);
+		}
+	}
+	else
+	{
+		while (1)
+		{
+			sem_wait(sem_chopsticks_id, right_chopstick);
+			printf("philosopher %zu (pid %d) picked up chopstick %zu (right)\n", my_index, my_pid, right_chopstick);
+			//sleep(1);
+			sem_wait(sem_chopsticks_id, left_chopstick);
+			printf("philosopher %zu (pid %d) picked up chopstick %zu (left)\n", my_index, my_pid, left_chopstick);
+		
 
-		sem_signal(sem_chopsticks_id, left_chopstick);
-		sem_signal(sem_chopsticks_id, right_chopstick);
-		printf("philosopher %zu (pid %d) is thinking\n", my_index, my_pid);
+			printf("philosopher %zu (pid %d) is eating\n", my_index, my_pid);
+			sleep(5 + rand() % 6);
+
+			sem_signal(sem_chopsticks_id, left_chopstick);
+			sem_signal(sem_chopsticks_id, right_chopstick);
+			printf("philosopher %zu (pid %d) is thinking\n", my_index, my_pid);
+		}
 	}
 
 	exit(EXIT_SUCCESS);
